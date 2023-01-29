@@ -1,7 +1,7 @@
 
 
 cmake_minimum_required(VERSION 3.10)
-project(approx_sec)
+project(aesc)
 
 
 set(CMAKE_CXX_STANDARD 11)
@@ -18,6 +18,6 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
 include_directories("${PROJECT_SOURCE_DIR}")
 file(GLOB SOURCES "*.cc")
-add_executable(approx_sec ${SOURCES})
+add_executable(aesc ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})

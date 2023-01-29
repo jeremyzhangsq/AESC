@@ -26,7 +26,7 @@ void monteCarlo(uint src, int len_walk, uint64 n_walk, map<uint,double>& mapVals
 	}
 }
 
-void runTPC(uint src, int len_walk, double eps, map<uint,double>& mapVals, const Graph& graph){
+void monteCarlo_C(uint src, int len_walk, double eps, map<uint,double>& mapVals, const Graph& graph){
     fastSrand();
     double x=0;
     for(uint len=1; len<len_walk; len++){
@@ -137,7 +137,7 @@ void calTau(vector<pair<double,vector<double>>> &Eigens, map<ipair,int>& Taus, c
 
 
 
-void PI_single(uint src, const Graph &graph, vector<double> &pvec, vector<uint> &S, double ds, vector<double> &tmp_hvec) {
+void push_single(uint src, const Graph &graph, vector<double> &pvec, vector<uint> &S, double ds, vector<double> &tmp_hvec) {
     vector<uint> tmpS;
     vector<bool> tmpSflag(graph.getN(),false);
     for(unsigned int v : S){
@@ -160,7 +160,7 @@ void PI_single(uint src, const Graph &graph, vector<double> &pvec, vector<uint> 
 }
 
 
-void powerMethod(const Graph& graph, map<ipair,double>& preds, map<ipair,int> &taus){
+void truncatedGraphTrav(const Graph& graph, map<ipair,double>& preds, map<ipair,int> &taus){
     std::vector<map<uint,double>> all_hvecs;
     all_hvecs.resize(graph.getN());
     double start = clock();
@@ -180,7 +180,7 @@ void powerMethod(const Graph& graph, map<ipair,double>& preds, map<ipair,int> &t
         for (const auto& v: graph.m_edges[src])
             tmp_hvec[v] = 1.0/ds;
         for(int i=0;i<maxTau;i++){
-            PI_single(src, graph, pvec, S,  ds, tmp_hvec);
+            push_single(src, graph, pvec, S,  ds, tmp_hvec);
         }
         for(const auto& vj: graph.m_edges[src]){
             hvec[vj]=tmp_hvec[vj];
@@ -278,7 +278,7 @@ double RW_double(uint src, uint v, const Graph& graph, double num_walk, int len_
     return x;
 }
 
-void twoPhaseEst(const Graph& graph, map<ipair,double>& preds, map<ipair,int> &taus, Config &config){
+void truncatedGraphTravPlus(const Graph& graph, map<ipair,double>& preds, map<ipair,int> &taus, Config &config){
     vector<map<uint,double>> all_hvecs;
     all_hvecs.resize(graph.getN());
 //    double pi_time = 0, rw_time = 0, chi_time=0;
@@ -303,7 +303,7 @@ void twoPhaseEst(const Graph& graph, map<ipair,double>& preds, map<ipair,int> &t
             global_max = 0;
             double picost = 0,rwcost = 0;
 //            double start = clock();
-            PI_single(src, graph, pvec, S,  ds, tmp_hvec);
+            push_single(src, graph, pvec, S,  ds, tmp_hvec);
 //            pi_time += time_by(start);
             ell++;
             for(auto v: S){

@@ -27,11 +27,9 @@ Config parseParams(int argc, char** argv){
         ("graph-name,g", po::value<string>()->required(), "graph file name")
         ("algo,a", po::value<string>()->required(), "algorithm name")
 //        ("edge-seed,s", po::value<int>()->default_value(0), "use edge seeds")
-        ("epsilon,e", po::value<double>()->default_value(0.5), "epsilon")
-        ("delta,d", po::value<double>()->default_value(0.1), "failure probability")
+        ("epsilon,e", po::value<double>()->default_value(0.05), "epsilon")
         ("gamma,y", po::value<int>()->default_value(10), "gamma")
-        ("omega,w", po::value<int>()->default_value(64), "omega largest eigen values")
-        ("num,s", po::value<int>()->default_value(100), "samples")
+        ("omega,w", po::value<int>()->default_value(128), "omega largest eigen values")
         ("verbose,v", po::value<int>()->default_value(1), "evaluate error or not")
     ;
 
@@ -57,17 +55,11 @@ Config parseParams(int argc, char** argv){
     if (vm.count("epsilon")){
         config.epsilon = vm["epsilon"].as<double>();
     }
-    if (vm.count("delta")){
-        config.delta = vm["delta"].as<double>();
-    }
     if (vm.count("gamma")){
         config.gamma = vm["gamma"].as<int>();
     }
     if (vm.count("omega")){
         config.omega = vm["omega"].as<int>();
-    }
-    if (vm.count("num")){
-        config.numquery = vm["num"].as<int>();
     }
     if (vm.count("verbose")){
         config.evaflag = vm["verbose"].as<int>();
@@ -151,15 +143,15 @@ int main(int argc, char **argv){
 
     config.lambda = graph.getLambda();
 
-    if(config.strAlgo==TPE){
+    if(config.strAlgo==TGTP){
         vector<pair<double,vector<double>>> Eigens;
         map<ipair,int> taus;
         loadEigens(config.strFolder, config.strGraph, graph, Eigens,config.omega);
         calTau(Eigens, taus, graph, config.omega, config.epsilon/2.0);
-        Timer tm(1, "TPE");
+        Timer tm(1, "TGT+");
         srand(time(NULL));
         map<ipair,double> pred_secs;
-        twoPhaseEst(graph,pred_secs,taus,config);
+        truncatedGraphTravPlus(graph,pred_secs,taus,config);
         if (config.evaflag){
             for (int q = 0; q < graph.getM(); ++q) {
                 ipair &edge = seeds[q];
@@ -167,15 +159,15 @@ int main(int argc, char **argv){
             }
         }
     }
-    else if(config.strAlgo==PM){
+    else if(config.strAlgo==TGT){
         vector<pair<double,vector<double>>> Eigens;
         map<ipair,int> taus;
         loadEigens(config.strFolder, config.strGraph, graph, Eigens,config.omega);
         calTau(Eigens, taus, graph, config.omega,config.epsilon);
-        Timer tm(1, "PM");
+        Timer tm(1, "TGT");
         srand(time(NULL));
         map<ipair,double> pred_secs;
-        powerMethod(graph,pred_secs,taus);
+        truncatedGraphTrav(graph,pred_secs,taus);
         if (config.evaflag){
             for (int q = 0; q < graph.getM(); ++q) {
                 ipair &edge = seeds[q];
@@ -183,7 +175,7 @@ int main(int argc, char **argv){
             }
         }
     }
-    else if(config.strAlgo==TP){
+    else if(config.strAlgo==MC){
         vector<pair<double,vector<double>>> Eigens;
         map<ipair,int> taus;
         loadEigens(config.strFolder, config.strGraph, graph, Eigens,config.omega);
@@ -191,7 +183,7 @@ int main(int argc, char **argv){
         vector<int> edgeid(graph.getM());
         iota (begin(edgeid), end(edgeid), 0);
         shuffle(edgeid.begin(), edgeid.end(), std::mt19937(std::random_device()()));
-        Timer tm(1, "TP");
+        Timer tm(1, "MonteCarlo");
         srand(time(NULL));
 
 	cout << "runnng.." << endl;
@@ -219,7 +211,7 @@ int main(int argc, char **argv){
         }
 
     }
-    else if(config.strAlgo==TPC){
+    else if(config.strAlgo==MCC){
         vector<pair<double,vector<double>>> Eigens;
         map<ipair,int> taus;
         loadEigens(config.strFolder, config.strGraph, graph, Eigens,config.omega);
@@ -227,11 +219,11 @@ int main(int argc, char **argv){
         vector<int> edgeid(graph.getM());
         iota (begin(edgeid), end(edgeid), 0);
         shuffle(edgeid.begin(), edgeid.end(), std::mt19937(std::random_device()()));
-        Timer tm(1, "TPC");
+        Timer tm(1, "MonteCarlo-C");
         srand(time(NULL));
-	vector<map<uint,double>> vecER;
+	    vector<map<uint,double>> vecER;
         cout << "runnng.." << endl;
-	for(uint src=0; src<graph.getN(); src++){
+	    for(uint src=0; src<graph.getN(); src++){
             int lenwalk = 0;
             for(const auto& v: graph.m_edges[src]){
                 ipair edge = MP(src,v);
@@ -240,7 +232,7 @@ int main(int argc, char **argv){
                 }
             }
             map<uint,double> vals;
-            runTPC(src, lenwalk, config.epsilon, vals, graph);
+            monteCarlo_C(src, lenwalk, config.epsilon, vals, graph);
             vecER.push_back(vals);
         }
         for (int i = 0; i < graph.getM(); ++i) {

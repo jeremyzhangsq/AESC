@@ -44,12 +44,10 @@ typedef std::pair<double, double> dpair;
 #define ALL(t) (t).begin(), (t).end()
 #define FOR(i, n) for(int (i)=0; (i)<((int)(n)); (i)++)
 
-const std::string TP = "tp";
-const std::string TPC = "tpc";
-const std::string MC2 = "mc2";
-const std::string AMC = "amc";
-const std::string TPE = "twophase";
-const std::string PM = "pm";
+const std::string MC = "mc";
+const std::string MCC = "mcc";
+const std::string TGTP = "tgt+";
+const std::string TGT = "tgt";
 
 
 
@@ -65,7 +63,6 @@ struct Config{
     uint ell=0;
     int gamma=0;
     int omega = 64;
-    int numquery = 100;
     int evaflag = 1;
     void display(){
         std::cout << "====================Configurations==================" << std::endl;
@@ -81,7 +78,7 @@ struct Config{
         std::cout << "====================Configurations==================" << std::endl;
     }
     void check(){
-        std::vector<std::string> Algos = {TP,TPE,PM,TPC,MC2};
+        std::vector<std::string> Algos = {MC,MCC,TGT,TGTP};
         auto f = std::find(Algos.begin(), Algos.end(), strAlgo);
         assert (f != Algos.end());
     }

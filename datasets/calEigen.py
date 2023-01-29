@@ -18,11 +18,11 @@ n = None
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process...')
-    parser.add_argument('--fname', type=str, default="facebook/", help='dataset folder')
-    parser.add_argument('--omega', type=int, default=128, help='omega')
+    parser.add_argument('-f', type=str, default="facebook/", help='dataset folder')
+    parser.add_argument('-w', type=int, default=128, help='omega')
     args = parser.parse_args()
 
-    ifile = '{}graph.txt'.format(args.fname)
+    ifile = '{}graph.txt'.format(args.f)
     G = nx.read_edgelist(ifile, delimiter=' ', nodetype=int, create_using=nx.Graph)
     n = G.number_of_nodes()
     m = G.number_of_edges()
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     Dneg = sp.diags(dinv, shape=(n,n))
     Dnegsqrt = np.sqrt(Dneg)
     P = Dsqrt.dot(P.dot(Dnegsqrt))
-    omega = args.omega
+    omega = args.w
     ofile = '{}sorted_eigens_{}.txt'.format(args.fname,omega)
     start = time.time()
     vals, vecs = sp.linalg.eigsh(P, omega, which='LM')

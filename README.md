@@ -11,14 +11,15 @@
 Constructing xxx
 ```
 $ cd datasets
-$ python -f facebook/ -w 128
+$ python calEigen.py -f facebook/ -w 128
 ```
 AESC approximation
 ```
+$ cd aesc
 $ cmake .
 $ make clean all -j16
 # run TGT with epsilon 0.05 and omega 128 on FB
-$ ./aesc -f datasets/ -g facebook -a tgt -e 0.05 -w 128       
+$ ./aesc -f ../datasets/ -g facebook -a tgt -e 0.05 -w 128       
 # run TGT+ with epsilon 0.05 and omega 128 on FB
-$ ./aesc -f datasets/ -g facebook -a tgt+ -e 0.05 -w 128
+$ ./aesc -f ../datasets/ -g facebook -a tgt+ -e 0.05 -w 128
 ```

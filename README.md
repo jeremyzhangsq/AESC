@@ -8,7 +8,7 @@
 - Boost: 1.65.1
 
 ## Running Commands
-Constructing xxx
+Constructing eigenvalues and eigenvectors
 ```
 $ cd datasets
 $ python calEigen.py -f facebook/ -w 128
